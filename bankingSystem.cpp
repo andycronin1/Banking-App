@@ -1,7 +1,10 @@
 #include<iostream>
+#include<fstream>
 #include<string>
 #include<map>
 #include<cctype>
+#include<json.hpp>
+using json = nlohmann::json;
 using namespace std;
 
 /***************Functions************************/
@@ -41,7 +44,7 @@ class Account
     {
         //gather the next account number for the next object instance. Using the function. 
         accountNumber = getNextAccountNumber();
-    };
+    }
 
     int storeMoney();
 
@@ -75,16 +78,22 @@ class Bank
     protected:
     
     public: 
-    //Bank();
+    //creating a file to store accounts on creation of bank class
+    void createAccountsFile()
+    {
+    static ofstream ofs("AllAccountDetails.json");
+    ofs.close();
+    }
+    //function to create an account
     Account createAccount(string fname, string lname, float initBalance);
     void closeAccount();
     //delete an Account class object
-    int deposit();
+    float deposit();
     //Read in data and store somewhere
-    int withdraw();
+    float withdraw();
     //read data stored in somewhere, remove it from storage, display to user
     int displayBalance();
-    //~Bank();
+    //function to check for valid name input
     bool validName(string name);
 
 
@@ -99,7 +108,7 @@ class Bank
 
 };
 int Bank::NumberOfAccounts = 0;
-//creating account dynamically. Data will be stored in file, then account deleted. 
+//Bank Functions
 Account Bank::createAccount(string fname, string lname, float initBalance)
 {
 
@@ -109,19 +118,20 @@ Account Bank::createAccount(string fname, string lname, float initBalance)
     NumberOfAccounts++;
     //generating new account
     Account acc = Account(fname, lname, initBalance);
-    //creating a map with last name and account number included. This needs to be appended to a file. 
-    map<string, string> AccountDetails;
-    AccountDetails.insert(pair<string, string>("First Name", fname));
-    AccountDetails.insert(pair<string, string>("Last Name", lname));
-    //adding account number to map but converting number to string type for storage 
-    AccountDetails.insert(pair<string, string>("Account Number", to_string(acc.accountNumber)));
+    //creating a JSON object with last name and account number included. This needs to be appended to a file. 
+    json AccountData = {
+        {"First Name: ", fname},
+        {"Last Name: ", lname},
+        {"Account Number: ", acc.accountNumber}
+    };
     //..........................................................................................
+    //Append account data to the JSON file 'All Account Details'
+    ofstream ofs("AllAccountDetails.json",ios::app);
+    ofs<<AccountData<<endl;
+    ofs.close();
     //print the Account number on screen and confirm creation. 
-    
-    cout << "Account Created. " << endl;
+    cout << "Account Created. Your Account Number is: " << acc.accountNumber << endl;
     cout << "Account Holder Name: " << fname << " " << lname << endl;
-    cout << "Account Number: " << acc.accountNumber << endl << endl;
-    //acc.getNextAccountNumber();
 
     return acc;
 
@@ -135,20 +145,10 @@ bool Bank::validName(string name)
             cout << "Please Enter a valid Name: " << endl;
             return false;
         }
-        else
-        /*
-        {
-            if (name.empty()) {
-            cout << "Empty name entered. Please enter valid name: " << endl;
-            return false; 
-            }
-        }
-        */
     }
     //return false if no invalid characters found
     return true;
 }
-
 
 int main()
 {
