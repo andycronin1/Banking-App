@@ -74,16 +74,19 @@ class Bank
     private: 
     string bank_name = "Andys Bank";
 
-
     protected:
     
     public: 
-    //creating a file to store accounts on creation of bank class
-    void createAccountsFile()
+    ///*****Constructors****/////
+    Bank()
     {
-    static ofstream ofs("AllAccountDetails.json");
+    static ofstream ofs("AllAccountDetails.json", ios::app);
+    json new_array = json::array();
+    ofs << new_array;
     ofs.close();
     }
+
+    //creating a file to store accounts on creation of bank class
     //function to create an account
     Account createAccount(string fname, string lname, float initBalance);
     void closeAccount();
@@ -95,6 +98,8 @@ class Bank
     int displayBalance();
     //function to check for valid name input
     bool validName(string name);
+    void showAccounts();
+
 
 
     //functions.....
@@ -118,17 +123,19 @@ Account Bank::createAccount(string fname, string lname, float initBalance)
     NumberOfAccounts++;
     //generating new account
     Account acc = Account(fname, lname, initBalance);
-    //creating a JSON object with last name and account number included. This needs to be appended to a file. 
-    json AccountData = {
-        {"First Name: ", fname},
-        {"Last Name: ", lname},
-        {"Account Number: ", acc.accountNumber}
-    };
-    //..........................................................................................
-    //Append account data to the JSON file 'All Account Details'
-    ofstream ofs("AllAccountDetails.json",ios::app);
-    ofs<<AccountData<<endl;
+    ///**
+
+    json newObj = {{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc.accountNumber}};
+    //now need to append this to 'new_array' that got created in the json file previously'
+    ifstream AccountDeets("AllAccountDetails.json");
+    json data;
+    AccountDeets >> data;
+    data.push_back(newObj);
+    ofstream ofs("AllAccountDetails.json");
+    ofs << data.dump(4);
     ofs.close();
+
+    ///***
     //print the Account number on screen and confirm creation. 
     cout << "Account Created. Your Account Number is: " << acc.accountNumber << endl;
     cout << "Account Holder Name: " << fname << " " << lname << endl;
@@ -148,6 +155,20 @@ bool Bank::validName(string name)
     }
     //return false if no invalid characters found
     return true;
+}
+void Bank::showAccounts()
+{
+    ifstream infile; 
+    infile.open("AllAccountDetails.json");
+    if(!infile)
+    {
+        cout << "File cannot be opened";
+    }
+    json UserAcc;
+    infile >> UserAcc;
+    cout << UserAcc;
+    if(infile.eof()) cout << "End of File";
+    infile.close();   
 }
 
 int main()
@@ -207,6 +228,7 @@ int main()
     case 5: cout << "Close an Account";
         break;   
     case 6: cout << "Show all Accounts";
+        b.showAccounts();
         break;   
     case 7: cout << "Quit";
         break;   
