@@ -54,6 +54,9 @@ class Account
         return nextAccountNumber++;
     }
 
+    ~Account()
+    {}
+
     
 
     //Account needs to be able to: 
@@ -72,7 +75,7 @@ class Bank
     static int NumberOfAccounts; 
 
     private: 
-    string bank_name = "Andys Bank";
+    string bank_name = "Andy's Bank";
 
     protected:
     
@@ -80,18 +83,23 @@ class Bank
     ///*****Constructors****/////
     Bank()
     {
+        //checking if file exits. If not, create empty array in file. 
+    ifstream inputFile("AllAccountDetails.json");
+    if(!inputFile.is_open())
+    { 
     static ofstream ofs("AllAccountDetails.json", ios::app);
     json new_array = json::array();
     ofs << new_array;
     ofs.close();
     }
+    }
 
     //creating a file to store accounts on creation of bank class
     //function to create an account
-    Account createAccount(string fname, string lname, float initBalance);
+    void createAccount(string fname, string lname, float initBalance);
     void closeAccount();
     //delete an Account class object
-    float deposit();
+    float deposit(int accountNumber, float depositAmount);
     //Read in data and store somewhere
     float withdraw();
     //read data stored in somewhere, remove it from storage, display to user
@@ -99,6 +107,10 @@ class Bank
     //function to check for valid name input
     bool validName(string name);
     void showAccounts();
+    ~Bank()
+    {
+
+    }
 
 
 
@@ -114,7 +126,7 @@ class Bank
 };
 int Bank::NumberOfAccounts = 0;
 //Bank Functions
-Account Bank::createAccount(string fname, string lname, float initBalance)
+void Bank::createAccount(string fname, string lname, float initBalance)
 {
 
     //***Need to add in tests so it doesn't enter an infinite loop if you select the wrong data type for input***//
@@ -122,10 +134,10 @@ Account Bank::createAccount(string fname, string lname, float initBalance)
     //increasing number of accounts 
     NumberOfAccounts++;
     //generating new account
-    Account acc = Account(fname, lname, initBalance);
+    unique_ptr<Account> acc(new Account(fname, lname, initBalance));
     ///**
 
-    json newObj = {{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc.accountNumber}};
+    json newObj = {{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc->accountNumber}};
     //now need to append this to 'new_array' that got created in the json file previously'
     ifstream AccountDeets("AllAccountDetails.json");
     json data;
@@ -137,10 +149,10 @@ Account Bank::createAccount(string fname, string lname, float initBalance)
 
     ///***
     //print the Account number on screen and confirm creation. 
-    cout << "Account Created. Your Account Number is: " << acc.accountNumber << endl;
+    cout << "Account Created. Your Account Number is: " << acc->accountNumber << endl;
     cout << "Account Holder Name: " << fname << " " << lname << endl;
 
-    return acc;
+    //return acc;
 
 }
 bool Bank::validName(string name)
@@ -170,6 +182,11 @@ void Bank::showAccounts()
     if(infile.eof()) cout << "End of File";
     infile.close();   
 }
+float Bank::deposit(int accountNumber, float depositAmount)
+{
+   
+}
+
 
 int main()
 {
