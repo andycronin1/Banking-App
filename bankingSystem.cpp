@@ -4,26 +4,11 @@
 #include<map>
 #include<cctype>
 #include "json.hpp"
+#include<cstdlib>
 using json = nlohmann::json;
 using namespace std;
 
-/***************Functions************************/
-
-bool validName(string name)
-{
-    getline(cin >> ws, name); // Use getline to handle spaces in input
-    for (int i = 0; i < name.length(); i++) {
-        if (name[i] == ' ' || name[i] == '.') {
-            //return false if invalid characters found
-            cout << "Please Enter a Valid Name: " << endl;
-            return false;
-        }
-    }
-    //return true if valid characters found
-    return true;
-}
-
-
+/********Classes**************/
 class Account
 {
     private:
@@ -45,29 +30,23 @@ class Account
         //gather the next account number for the next object instance. Using the function. 
         accountNumber = getNextAccountNumber();
     }
-
-    int storeMoney();
-
+    
     int getNextAccountNumber()
     {
         //increment the next account number and return it 
         return nextAccountNumber++;
     }
 
-    ~Account()
-    {}
 
-    
-
+    friend ofstream; 
+    friend ifstream;
     //Account needs to be able to: 
     //store money
     //store account data
     //Generate account number when created
-
-
-
 };
 int Account::nextAccountNumber = 1;
+//AccountFunctions
 
 class Bank 
 {
@@ -133,18 +112,25 @@ void Bank::createAccount(string fname, string lname, float initBalance)
 
     //increasing number of accounts 
     NumberOfAccounts++;
-    //generating new account
+    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
     unique_ptr<Account> acc(new Account(fname, lname, initBalance));
-    ///**
 
-    json newObj = {{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc->accountNumber}};
-    //now need to append this to 'new_array' that got created in the json file previously'
+    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
+    unique_ptr<json> newObj(new json{{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc->accountNumber}});
+    //now need to append this to 'newObj' that got created in the json file previously'
+    //importing account details json file
     ifstream AccountDeets("AllAccountDetails.json");
-    json data;
-    AccountDeets >> data;
-    data.push_back(newObj);
+    //creating a JSON object and pointer to store the account details in 
+    unique_ptr<json> data(new json);
+    //sending account details to the data stored inside the pointer 
+    AccountDeets >> *data;
+    //calling the push back function (-> used to call the member function of the data inside the pointer )
+    data->push_back(*newObj);
+    //sending to account details json file
     ofstream ofs("AllAccountDetails.json");
-    ofs << data.dump(4);
+    //organising JSON data for readability
+    ofs << data->dump(4);
+    //closing file
     ofs.close();
 
     ///***
