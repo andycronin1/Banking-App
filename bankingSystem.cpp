@@ -13,22 +13,24 @@ class Account
 {
     private:
     
-    string firstName;
-    string lastName;
+    string fname;
+    string lname;
     float balance;
+    int accountNumber;
 
     public:
     
     //static member so all classes have access to the counter for next account number
     static int nextAccountNumber;
-    //individual objet account number 
-    int accountNumber;
     
     //constructor to create object instance 
     Account(string fname,string lname,float balance)
     {
         //gather the next account number for the next object instance. Using the function. 
         accountNumber = getNextAccountNumber();
+        this->fname = fname;
+        this->lname = lname;
+        this->balance = balance;
     }
     
     int getNextAccountNumber()
@@ -38,15 +40,50 @@ class Account
     }
 
 
-    friend ofstream; 
     friend ifstream;
-    //Account needs to be able to: 
-    //store money
-    //store account data
-    //Generate account number when created
+    friend class Bank;
+    friend void depositMoney();
+    //friend void accountToFile(Account *acc);
+    string getFName() const {return fname;}
+    string getLName() const {return lname;}
+    float getBalance() const {return balance;}
+    int getAccNumber() const {return accountNumber;}
+
+
+    friend ostream& operator<<(ostream& os, const Account& obj);
+
 };
+//initialise the account number
 int Account::nextAccountNumber = 1;
 //AccountFunctions
+void depositMoney(){}
+ostream& operator<<(ostream& os, const Account& obj) {
+    os << "your first name is: " << obj.fname;
+    return os;
+}
+void accountToFile(Account*& acc)
+{
+    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
+    cout << acc->getFName();
+    unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
+    //now need to append this to 'newObj' that got created in the json file previously'
+    cout << *newObj << endl;
+    //importing account details json file
+    ifstream AccountDeets("AllAccountDetails.json");
+    //creating a JSON object and pointer to store the account details in 
+    unique_ptr<json> data(new json);
+    //sending account details to the data stored inside the pointer 
+    AccountDeets >> *data;
+    //calling the push back function (-> used to call the member function of the data inside the pointer )
+    data->push_back(*newObj);
+    //sending to account details json file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << data->dump(4);
+    //closing file
+    ofs.close();
+
+}
 
 class Bank 
 {
@@ -72,17 +109,16 @@ class Bank
     ofs.close();
     }
     }
-
     //creating a file to store accounts on creation of bank class
     //function to create an account
     void createAccount(string fname, string lname, float initBalance);
     void closeAccount();
     //delete an Account class object
-    float deposit(int accountNumber, float depositAmount);
+    float deposit();
     //Read in data and store somewhere
     float withdraw();
     //read data stored in somewhere, remove it from storage, display to user
-    int displayBalance();
+    void displayBalance();
     //function to check for valid name input
     bool validName(string name);
     void showAccounts();
@@ -105,41 +141,13 @@ class Bank
 };
 int Bank::NumberOfAccounts = 0;
 //Bank Functions
-void Bank::createAccount(string fname, string lname, float initBalance)
+void Bank::createAccount(string fname, string lname, float balance)
 {
-
-    //***Need to add in tests so it doesn't enter an infinite loop if you select the wrong data type for input***//
-
-    //increasing number of accounts 
-    NumberOfAccounts++;
-    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
-    unique_ptr<Account> acc(new Account(fname, lname, initBalance));
-
-    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
-    unique_ptr<json> newObj(new json{{"First Name", fname}, {"Last Name", lname}, {"Account Number", acc->accountNumber}});
-    //now need to append this to 'newObj' that got created in the json file previously'
-    //importing account details json file
-    ifstream AccountDeets("AllAccountDetails.json");
-    //creating a JSON object and pointer to store the account details in 
-    unique_ptr<json> data(new json);
-    //sending account details to the data stored inside the pointer 
-    AccountDeets >> *data;
-    //calling the push back function (-> used to call the member function of the data inside the pointer )
-    data->push_back(*newObj);
-    //sending to account details json file
-    ofstream ofs("AllAccountDetails.json");
-    //organising JSON data for readability
-    ofs << data->dump(4);
-    //closing file
-    ofs.close();
-
-    ///***
-    //print the Account number on screen and confirm creation. 
-    cout << "Account Created. Your Account Number is: " << acc->accountNumber << endl;
-    cout << "Account Holder Name: " << fname << " " << lname << endl;
-
-    //return acc;
-
+    //generating new account and assinging to heap
+    Account* acc = new Account(fname, lname, balance);
+    accountToFile(acc);
+    //removing from heap
+    delete acc;
 }
 bool Bank::validName(string name)
 {   
@@ -168,9 +176,25 @@ void Bank::showAccounts()
     if(infile.eof()) cout << "End of File";
     infile.close();   
 }
-float Bank::deposit(int accountNumber, float depositAmount)
+void Bank::displayBalance()
 {
    
+   ifstream AccountDeets("AllAccountDetails.json");
+   unique_ptr<json> AccountData(new json);
+   AccountDeets >> *AccountData;
+   cout << "Please enter your account number: " << endl;
+   //cin >> accountNumber;
+   for(auto &it : *AccountData)
+   {
+        cout << "Your balance is: " << it["Balance"] << endl;
+   }
+
+   /*
+   
+   cout << "Please Enter Your Account Number: " << endl;
+   cin >> AccountNumber;
+   for(int i=0, )
+*/
 }
 
 
@@ -223,6 +247,7 @@ int main()
         b.createAccount(string(fname), string(lname), float(balance));
             break;           
     case 2: cout << "Balance enquiry";
+        b.displayBalance();
         break;   
     case 3: cout << "Deposit";
         break;   
@@ -242,13 +267,4 @@ int main()
 
    return 0; 
 }
-
-//What we want 
-//1. Open Account 
-//2. Balance enquriy 
-//3. Deposit 
-//4. Withrdrawl 
-//5. Close an Account 
-//6. Show all Accounts 
-//7. Quit
 
