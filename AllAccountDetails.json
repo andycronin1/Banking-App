@@ -1,20 +1,14 @@
 [
     {
         "Account Number": 1,
-        "Balance": 6547033.0,
-        "First Name": "dfsdfsdf",
+        "Balance": 3422342.0,
+        "First Name": "dsfsdf",
         "Last Name": "sdfsdf"
     },
     {
         "Account Number": 2,
-        "Balance": 128568.0,
-        "First Name": "fdsfsdf",
-        "Last Name": "sdfsdfs"
-    },
-    {
-        "Account Number": 3,
-        "Balance": 5433.0,
-        "First Name": "sdfsdsdf",
-        "Last Name": "dsfsfsdf"
+        "Balance": 387328.0,
+        "First Name": "dsfsdf",
+        "Last Name": "sdfsdf"
     }
 ]

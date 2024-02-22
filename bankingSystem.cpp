@@ -212,13 +212,13 @@ void Bank::deposit()
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
-   cout << "How much would you like to deposit?: " << endl;
-   cin >> depositAmount;
    for(auto &it : *AccountData)
    {
         if(it["Account Number"] == accountNumber)
         {
         validAccount = true;
+        cout << "How much would you like to deposit?: " << endl;
+        cin >> depositAmount;
         cout << "Your original balance was: " << it["Balance"] << endl;
         oldAmount = it["Balance"];
         newAmount = oldAmount + depositAmount;
@@ -232,6 +232,7 @@ void Bank::deposit()
    {
     std::cout << "Please enter valid account number: " << endl;
    }
+   }
    
    //sending details back to the file
     ofstream ofs("AllAccountDetails.json");
@@ -240,7 +241,6 @@ void Bank::deposit()
     //closing file
     ofs.close();
 
-}
 }
 void Bank::withdraw()
 {
@@ -259,13 +259,13 @@ void Bank::withdraw()
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
-   cout << "How much would you like to withdraw?: " << endl;
-   cin >> withdrawAmount;
    for(auto &it : *AccountData)
    {
         if(it["Account Number"] == accountNumber)
         {
         validAccount = true;
+           cout << "How much would you like to withdraw?: " << endl;
+        cin >> withdrawAmount;
         cout << "Your original balance was: " << it["Balance"] << endl;
         oldAmount = it["Balance"];
         newAmount = oldAmount - withdrawAmount;
