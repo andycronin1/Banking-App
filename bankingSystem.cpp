@@ -23,6 +23,7 @@ class Account
     //static member so all classes have access to the counter for next account number
     static int nextAccountNumber;
     
+    ////*****************Constructors******************/////////////////////
     //constructor to create object instance 
     Account(string fname,string lname,float balance)
     {
@@ -39,7 +40,7 @@ class Account
         return nextAccountNumber++;
     }
 
-
+    ///*************Member Functions******************///////////
     friend ifstream;
     friend class Bank;
     friend void depositMoney();
@@ -49,14 +50,14 @@ class Account
     float getBalance() const {return balance;}
     int getAccNumber() const {return accountNumber;}
 
-
     friend ostream& operator<<(ostream& os, const Account& obj);
 
 };
 //initialise the account number
 int Account::nextAccountNumber = 1;
 //AccountFunctions
-void depositMoney(){}
+void depositMoney(){
+}
 ostream& operator<<(ostream& os, const Account& obj) {
     os << "your first name is: " << obj.fname;
     return os;
@@ -67,7 +68,6 @@ void accountToFile(Account*& acc)
     cout << acc->getFName();
     unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
     //now need to append this to 'newObj' that got created in the json file previously'
-    cout << *newObj << endl;
     //importing account details json file
     ifstream AccountDeets("AllAccountDetails.json");
     //creating a JSON object and pointer to store the account details in 
@@ -109,12 +109,13 @@ class Bank
     ofs.close();
     }
     }
-    //creating a file to store accounts on creation of bank class
+    ///*********************Member Functions*****************////////////////////
+
     //function to create an account
     void createAccount(string fname, string lname, float initBalance);
     void closeAccount();
     //delete an Account class object
-    float deposit();
+    void deposit();
     //Read in data and store somewhere
     float withdraw();
     //read data stored in somewhere, remove it from storage, display to user
@@ -122,23 +123,15 @@ class Bank
     //function to check for valid name input
     bool validName(string name);
     void showAccounts();
+
+    ///*******************Destructors**********************/////////
     ~Bank()
     {
 
     }
 
-
-
-    //functions.....
-    //Open an account
-    //Deposit Money
-    //withdraw Money
-    //display balance 
-    //Show accounts
-    //close account 
-      
-
 };
+//Bank initialisors 
 int Bank::NumberOfAccounts = 0;
 //Bank Functions
 void Bank::createAccount(string fname, string lname, float balance)
@@ -178,24 +171,75 @@ void Bank::showAccounts()
 }
 void Bank::displayBalance()
 {
-   
+   int accountNumber;
    ifstream AccountDeets("AllAccountDetails.json");
    unique_ptr<json> AccountData(new json);
    AccountDeets >> *AccountData;
+   while(accountNumber != true)
+   {
    cout << "Please enter your account number: " << endl;
-   //cin >> accountNumber;
+   cin >> accountNumber;
    for(auto &it : *AccountData)
    {
+        if(it["Account Number"] == accountNumber)
+        {
         cout << "Your balance is: " << it["Balance"] << endl;
+        accountNumber = true;
+        break;
+        }
    }
-
-   /*
+   cout << "Please enter valid account number: " << endl;
+   }
+   accountNumber = false;
    
-   cout << "Please Enter Your Account Number: " << endl;
-   cin >> AccountNumber;
-   for(int i=0, )
-*/
+   
+
 }
+void Bank::deposit()
+{
+   int accountNumber;
+   float oldAmount;
+   float depositAmount;
+   float newAmount;
+   //importing json file
+   ifstream AccountDeets("AllAccountDetails.json");
+   //creating new unqiue pointer and storing JSON data inside for modification
+   unique_ptr<json> AccountData(new json);
+   AccountDeets >> *AccountData;
+   //setting up while loop to find account and add money 
+   while(accountNumber != true)
+   {
+   cout << "Please enter your account number: " << endl;
+   cin >> accountNumber;
+   cout << "How much would you like to deposit?: " << endl;
+   cin >> depositAmount;
+   for(auto &it : *AccountData)
+   {
+        if(it["Account Number"] == accountNumber)
+        {
+        cout << "Your original balance was: " << it["Balance"] << endl;
+        oldAmount = it["Balance"];
+        newAmount = oldAmount + depositAmount;
+        it["Balance"] = newAmount;
+        cout << "Your deposit amount is" << depositAmount << endl;
+        cout << "Your new balance is: " << it["Balance"] << endl;
+        accountNumber = true;
+        break;
+        }
+   }
+   cout << "Please enter valid account number: " << endl;
+   }
+   accountNumber = false;
+   
+   //sending details back to the file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << AccountData->dump(4);
+    //closing file
+    ofs.close();
+
+}
+
 
 
 int main()
@@ -249,7 +293,8 @@ int main()
     case 2: cout << "Balance enquiry";
         b.displayBalance();
         break;   
-    case 3: cout << "Deposit";
+    case 3: cout << "Deposit" << endl;
+        b.deposit();
         break;   
     case 4: cout << "Withdraw";
         break;   
