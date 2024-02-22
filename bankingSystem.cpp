@@ -56,7 +56,8 @@ class Account
 //initialise the account number
 int Account::nextAccountNumber = 1;
 //AccountFunctions
-void depositMoney(){}
+void depositMoney(){
+}
 ostream& operator<<(ostream& os, const Account& obj) {
     os << "your first name is: " << obj.fname;
     return os;
@@ -114,7 +115,7 @@ class Bank
     void createAccount(string fname, string lname, float initBalance);
     void closeAccount();
     //delete an Account class object
-    float deposit();
+    void deposit();
     //Read in data and store somewhere
     float withdraw();
     //read data stored in somewhere, remove it from storage, display to user
@@ -194,6 +195,51 @@ void Bank::displayBalance()
    
 
 }
+void Bank::deposit()
+{
+   int accountNumber;
+   float oldAmount;
+   float depositAmount;
+   float newAmount;
+   //importing json file
+   ifstream AccountDeets("AllAccountDetails.json");
+   //creating new unqiue pointer and storing JSON data inside for modification
+   unique_ptr<json> AccountData(new json);
+   AccountDeets >> *AccountData;
+   //setting up while loop to find account and add money 
+   while(accountNumber != true)
+   {
+   cout << "Please enter your account number: " << endl;
+   cin >> accountNumber;
+   cout << "How much would you like to deposit?: " << endl;
+   cin >> depositAmount;
+   for(auto &it : *AccountData)
+   {
+        if(it["Account Number"] == accountNumber)
+        {
+        cout << "Your original balance was: " << it["Balance"] << endl;
+        oldAmount = it["Balance"];
+        newAmount = oldAmount + depositAmount;
+        it["Balance"] = newAmount;
+        cout << "Your deposit amount is" << depositAmount << endl;
+        cout << "Your new balance is: " << it["Balance"] << endl;
+        accountNumber = true;
+        break;
+        }
+   }
+   cout << "Please enter valid account number: " << endl;
+   }
+   accountNumber = false;
+   
+   //sending details back to the file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << AccountData->dump(4);
+    //closing file
+    ofs.close();
+
+}
+
 
 
 int main()
@@ -247,7 +293,8 @@ int main()
     case 2: cout << "Balance enquiry";
         b.displayBalance();
         break;   
-    case 3: cout << "Deposit";
+    case 3: cout << "Deposit" << endl;
+        b.deposit();
         break;   
     case 4: cout << "Withdraw";
         break;   
