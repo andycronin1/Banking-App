@@ -99,7 +99,7 @@ class Bank
     ///*****Constructors****/////
     Bank()
     {
-        //checking if file exits. If not, create empty array in file. 
+    //checking if file exits. If not, create empty array in file. 
     ifstream inputFile("AllAccountDetails.json");
     if(!inputFile.is_open())
     { 
@@ -117,7 +117,7 @@ class Bank
     //delete an Account class object
     void deposit();
     //Read in data and store somewhere
-    float withdraw();
+    void withdraw();
     //read data stored in somewhere, remove it from storage, display to user
     void displayBalance();
     //function to check for valid name input
@@ -201,13 +201,14 @@ void Bank::deposit()
    float oldAmount;
    float depositAmount;
    float newAmount;
+   bool validAccount = false;
    //importing json file
    ifstream AccountDeets("AllAccountDetails.json");
    //creating new unqiue pointer and storing JSON data inside for modification
    unique_ptr<json> AccountData(new json);
    AccountDeets >> *AccountData;
    //setting up while loop to find account and add money 
-   while(accountNumber != true)
+   while(validAccount != true)
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
@@ -217,19 +218,20 @@ void Bank::deposit()
    {
         if(it["Account Number"] == accountNumber)
         {
+        validAccount = true;
         cout << "Your original balance was: " << it["Balance"] << endl;
         oldAmount = it["Balance"];
         newAmount = oldAmount + depositAmount;
         it["Balance"] = newAmount;
-        cout << "Your deposit amount is" << depositAmount << endl;
+        cout << "Your deposit amount is: " << depositAmount << endl;
         cout << "Your new balance is: " << it["Balance"] << endl;
-        accountNumber = true;
         break;
         }
    }
-   cout << "Please enter valid account number: " << endl;
+    if(validAccount !=  true)
+   {
+    std::cout << "Please enter valid account number: " << endl;
    }
-   accountNumber = false;
    
    //sending details back to the file
     ofstream ofs("AllAccountDetails.json");
@@ -239,7 +241,64 @@ void Bank::deposit()
     ofs.close();
 
 }
+}
+void Bank::withdraw()
+{
+   int accountNumber;
+   float oldAmount;
+   float withdrawAmount;
+   float newAmount;
+   bool validAccount = false;
+   //importing json file
+   ifstream AccountDeets("AllAccountDetails.json");
+   //creating new unqiue pointer and storing JSON data inside for modification
+   unique_ptr<json> AccountData(new json);
+   AccountDeets >> *AccountData;
+   //setting up while loop to find account and add money 
+   while(validAccount != true)
+   {
+   cout << "Please enter your account number: " << endl;
+   cin >> accountNumber;
+   cout << "How much would you like to withdraw?: " << endl;
+   cin >> withdrawAmount;
+   for(auto &it : *AccountData)
+   {
+        if(it["Account Number"] == accountNumber)
+        {
+        validAccount = true;
+        cout << "Your original balance was: " << it["Balance"] << endl;
+        oldAmount = it["Balance"];
+        newAmount = oldAmount - withdrawAmount;
+        if(newAmount < 0)
+        {
+            cout << "you do not have sufficient funds for this withdrawl. Please try again" << "\n";
+            cin.ignore();
+            break;
+        }
+        else
+        {
+        it["Balance"] = newAmount;
+        cout << "You have withdrawn " << withdrawAmount << endl;
+        cout << "Your new balance is: " << it["Balance"] << endl;
+        validAccount = true;
+        break;
+        }
+        }
+   }
+       if(validAccount !=  true)
+   {
+    std::cout << "Please enter valid account number: " << endl;
+   }
+   }
+   
+   //sending details back to the file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << AccountData->dump(4);
+    //closing file
+    ofs.close();
 
+}
 
 
 int main()
@@ -274,7 +333,7 @@ int main()
    }
    switch(selectedOption)
    {
-    case 1:
+    case 1: //create an account
         while(true)
         {
             cout << "Please Enter Your First Name: ";
@@ -290,21 +349,23 @@ int main()
         cin >> balance;
         b.createAccount(string(fname), string(lname), float(balance));
             break;           
-    case 2: cout << "Balance enquiry";
+    case 2: //balance enquiry
         b.displayBalance();
         break;   
-    case 3: cout << "Deposit" << endl;
+    case 3: //deposit
         b.deposit();
         break;   
-    case 4: cout << "Withdraw";
+    case 4:
+        b.withdraw(); //Withdraw
         break;   
-    case 5: cout << "Close an Account";
+    case 5: //close Accounts
         break;   
-    case 6: cout << "Show all Accounts";
+    case 6: //Show All Accounts
         b.showAccounts();
         break;   
-    case 7: cout << "Quit";
-        break;   
+    case 7: //Quit
+        cout << "Thanks for using my Banking App! " << "\n";
+        exit(0);   
    }
    }
 
