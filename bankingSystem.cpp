@@ -23,6 +23,7 @@ class Account
     //static member so all classes have access to the counter for next account number
     static int nextAccountNumber;
     
+    ////*****************Constructors******************/////////////////////
     //constructor to create object instance 
     Account(string fname,string lname,float balance)
     {
@@ -39,7 +40,7 @@ class Account
         return nextAccountNumber++;
     }
 
-
+    ///*************Member Functions******************///////////
     friend ifstream;
     friend class Bank;
     friend void depositMoney();
@@ -48,7 +49,6 @@ class Account
     string getLName() const {return lname;}
     float getBalance() const {return balance;}
     int getAccNumber() const {return accountNumber;}
-
 
     friend ostream& operator<<(ostream& os, const Account& obj);
 
@@ -67,7 +67,6 @@ void accountToFile(Account*& acc)
     cout << acc->getFName();
     unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
     //now need to append this to 'newObj' that got created in the json file previously'
-    cout << *newObj << endl;
     //importing account details json file
     ifstream AccountDeets("AllAccountDetails.json");
     //creating a JSON object and pointer to store the account details in 
@@ -109,7 +108,8 @@ class Bank
     ofs.close();
     }
     }
-    //creating a file to store accounts on creation of bank class
+    ///*********************Member Functions*****************////////////////////
+
     //function to create an account
     void createAccount(string fname, string lname, float initBalance);
     void closeAccount();
@@ -122,23 +122,15 @@ class Bank
     //function to check for valid name input
     bool validName(string name);
     void showAccounts();
+
+    ///*******************Destructors**********************/////////
     ~Bank()
     {
 
     }
 
-
-
-    //functions.....
-    //Open an account
-    //Deposit Money
-    //withdraw Money
-    //display balance 
-    //Show accounts
-    //close account 
-      
-
 };
+//Bank initialisors 
 int Bank::NumberOfAccounts = 0;
 //Bank Functions
 void Bank::createAccount(string fname, string lname, float balance)
@@ -178,23 +170,29 @@ void Bank::showAccounts()
 }
 void Bank::displayBalance()
 {
-   
+   int accountNumber;
    ifstream AccountDeets("AllAccountDetails.json");
    unique_ptr<json> AccountData(new json);
    AccountDeets >> *AccountData;
+   while(accountNumber != true)
+   {
    cout << "Please enter your account number: " << endl;
-   //cin >> accountNumber;
+   cin >> accountNumber;
    for(auto &it : *AccountData)
    {
+        if(it["Account Number"] == accountNumber)
+        {
         cout << "Your balance is: " << it["Balance"] << endl;
+        accountNumber = true;
+        break;
+        }
    }
-
-   /*
+   cout << "Please enter valid account number: " << endl;
+   }
+   accountNumber = false;
    
-   cout << "Please Enter Your Account Number: " << endl;
-   cin >> AccountNumber;
-   for(int i=0, )
-*/
+   
+
 }
 
 
