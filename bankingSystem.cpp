@@ -171,10 +171,11 @@ void Bank::showAccounts()
 void Bank::displayBalance()
 {
    int accountNumber;
+   bool validAccount = false;
    ifstream AccountDeets("AllAccountDetails.json");
    unique_ptr<json> AccountData(new json);
    AccountDeets >> *AccountData;
-   while(accountNumber != true)
+   while(validAccount != true)
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
@@ -183,13 +184,15 @@ void Bank::displayBalance()
         if(it["Account Number"] == accountNumber)
         {
         cout << "Your balance is: " << it["Balance"] << endl;
-        accountNumber = true;
+        validAccount = true;
         break;
         }
    }
-   cout << "Please enter valid account number: " << endl;
+    if(validAccount !=  true)
+   {
+    std::cout << "Please enter valid account number: " << endl;
    }
-   accountNumber = false;
+   }
 }
 void Bank::deposit()
 {
@@ -318,7 +321,7 @@ void Bank::closeAccount()
             break;
         }
     }
-    
+
     if(validAccount !=  true)
    {
     std::cout << "Please enter valid account number: " << endl;
