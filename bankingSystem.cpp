@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-/********Classes**************/
+//****************************************************Classes***************************************************//
 class Account
 {
     private:
@@ -23,8 +23,7 @@ class Account
     //static member so all classes have access to the counter for next account number
     static int nextAccountNumber;
     
-    ////*****************Constructors******************/////////////////////
-    //constructor to create object instance 
+    ////*****************Constructors******************////
     Account(string fname,string lname,float balance)
     {
         //gather the next account number for the next object instance. Using the function. 
@@ -56,8 +55,6 @@ class Account
 //initialise the account number
 int Account::nextAccountNumber = 1;
 //AccountFunctions
-void depositMoney(){
-}
 ostream& operator<<(ostream& os, const Account& obj) {
     os << "your first name is: " << obj.fname;
     return os;
@@ -127,7 +124,7 @@ class Bank
     ///*******************Destructors**********************/////////
     ~Bank()
     {
-
+        cout << "Bank Class Destroyed" << "\n";
     }
 
 };
@@ -163,9 +160,11 @@ void Bank::showAccounts()
     {
         cout << "File cannot be opened";
     }
-    json UserAcc;
-    infile >> UserAcc;
-    cout << UserAcc;
+    unique_ptr<json> UserAcc(new json);
+    infile >> *UserAcc;
+    cout << "***Accounts***" << "\n";
+    for(auto &it : *UserAcc)
+        cout << "Last Name" << it["Last Name"] && cout << "Account Number: " << it["Account Number"] << "\n";
     if(infile.eof()) cout << "End of File";
     infile.close();   
 }
@@ -191,16 +190,11 @@ void Bank::displayBalance()
    cout << "Please enter valid account number: " << endl;
    }
    accountNumber = false;
-   
-   
-
 }
 void Bank::deposit()
 {
    int accountNumber;
-   float oldAmount;
    float depositAmount;
-   float newAmount;
    bool validAccount = false;
    //importing json file
    ifstream AccountDeets("AllAccountDetails.json");
@@ -220,8 +214,8 @@ void Bank::deposit()
         cout << "How much would you like to deposit?: " << endl;
         cin >> depositAmount;
         cout << "Your original balance was: " << it["Balance"] << endl;
-        oldAmount = it["Balance"];
-        newAmount = oldAmount + depositAmount;
+        float oldAmount = it["Balance"];
+        auto newAmount = oldAmount + depositAmount;
         it["Balance"] = newAmount;
         cout << "Your deposit amount is: " << depositAmount << endl;
         cout << "Your new balance is: " << it["Balance"] << endl;
@@ -300,7 +294,7 @@ void Bank::withdraw()
 
 }
 
-
+//**********************************************Main**********************************************************//
 int main()
 {
    int selectedOption;
