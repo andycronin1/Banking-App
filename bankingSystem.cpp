@@ -241,7 +241,6 @@ void Bank::withdraw()
    int accountNumber;
    float oldAmount;
    float withdrawAmount;
-   float newAmount;
    bool validAccount = false;
    //importing json file
    ifstream AccountDeets("AllAccountDetails.json");
@@ -262,7 +261,7 @@ void Bank::withdraw()
         cin >> withdrawAmount;
         cout << "Your original balance was: " << it["Balance"] << endl;
         oldAmount = it["Balance"];
-        newAmount = oldAmount - withdrawAmount;
+        auto newAmount = oldAmount - withdrawAmount;
         if(newAmount < 0)
         {
             cout << "you do not have sufficient funds for this withdrawl. Please try again" << "\n";
@@ -292,6 +291,46 @@ void Bank::withdraw()
     //closing file
     ofs.close();
 
+}
+void Bank::closeAccount()
+{
+   int accountNumber;
+   float depositAmount;
+   bool validAccount = false;
+   //importing json file
+   ifstream AccountDeets("AllAccountDetails.json");
+   //creating new unqiue pointer and storing JSON data inside for modification
+   unique_ptr<json> AccountData(new json);
+   AccountDeets >> *AccountData;
+   //setting up while loop to find account and add money 
+   while(validAccount != true)
+   {
+   cout << "Please enter your account number: " << endl;
+   cin >> accountNumber;
+   
+    for (auto it = AccountData->begin(); it != AccountData->end(); ++it)
+    {
+        if ((*it)["Account Number"] == accountNumber)
+        {
+            validAccount = true;
+            std::cout << "Account " << accountNumber << " removed." << std::endl;
+            AccountData->erase(it); // Remove the account from the array
+            break;
+        }
+    }
+    
+    if(validAccount !=  true)
+   {
+    std::cout << "Please enter valid account number: " << endl;
+   }
+   }
+   
+   //sending details back to the file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << AccountData->dump(4);
+    //closing file
+    ofs.close();
 }
 
 //**********************************************Main**********************************************************//
@@ -353,6 +392,7 @@ int main()
         b.withdraw(); //Withdraw
         break;   
     case 5: //close Accounts
+        b.closeAccount();
         break;   
     case 6: //Show All Accounts
         b.showAccounts();
