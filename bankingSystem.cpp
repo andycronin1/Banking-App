@@ -5,8 +5,18 @@
 #include<cctype>
 #include "json.hpp"
 #include<cstdlib>
+#include <typeinfo>
 using json = nlohmann::json;
 using namespace std;
+
+//****************************************************Structs***************************************************//
+
+struct Transaction
+{
+    double transaction_amount;
+    string date;
+    string description;
+};
 
 //****************************************************Classes***************************************************//
 class Account
@@ -27,7 +37,7 @@ class Account
     Account(string fname,string lname,float balance)
     {
         //gather the next account number for the next object instance. Using the function. 
-        accountNumber = getNextAccountNumber();
+        this->accountNumber = getNextAccountNumber();
         this->fname = fname;
         this->lname = lname;
         this->balance = balance;
@@ -62,7 +72,6 @@ ostream& operator<<(ostream& os, const Account& obj) {
 void accountToFile(Account*& acc)
 {
     //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
-    cout << acc->getFName();
     unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
     //now need to append this to 'newObj' that got created in the json file previously'
     //importing account details json file
@@ -72,7 +81,7 @@ void accountToFile(Account*& acc)
     //sending account details to the data stored inside the pointer 
     AccountDeets >> *data;
     //calling the push back function (-> used to call the member function of the data inside the pointer )
-    data->push_back(*newObj);
+    (*data)["Accounts"].push_back(*newObj);
     //sending to account details json file
     ofstream ofs("AllAccountDetails.json");
     //organising JSON data for readability
@@ -101,8 +110,9 @@ class Bank
     if(!inputFile.is_open())
     { 
     static ofstream ofs("AllAccountDetails.json", ios::app);
-    json new_array = json::array();
-    ofs << new_array;
+    json new_object = json::object();
+    new_object["Accounts"] = json::array();
+    ofs << new_object;
     ofs.close();
     }
     }
@@ -120,6 +130,7 @@ class Bank
     //function to check for valid name input
     bool validName(string name);
     void showAccounts();
+    void createTransaction();
 
     ///*******************Destructors**********************/////////
     ~Bank()
@@ -334,6 +345,10 @@ void Bank::closeAccount()
     ofs << AccountData->dump(4);
     //closing file
     ofs.close();
+}
+void Bank::createTransaction()
+{
+    
 }
 
 //**********************************************Main**********************************************************//

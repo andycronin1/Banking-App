@@ -1,14 +1,10 @@
-[
-    {
-        "Account Number": 2,
-        "Balance": 475225.0,
-        "First Name": "dsfsdf",
-        "Last Name": "sdfsdf"
-    },
-    {
-        "Account Number": 1,
-        "Balance": 34234.0,
-        "First Name": "sdfsdf",
-        "Last Name": "sdfsdf"
-    }
-]
+{
+    "Accounts": [
+        {
+            "Account Number": 1,
+            "Balance": 234234.0,
+            "First Name": "fsdfsdf",
+            "Last Name": "sdfsdf"
+        }
+    ]
+}
