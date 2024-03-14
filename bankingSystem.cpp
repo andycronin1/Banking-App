@@ -174,7 +174,7 @@ void Bank::showAccounts()
     unique_ptr<json> UserAcc(new json);
     infile >> *UserAcc;
     cout << "***Accounts***" << "\n";
-    for(auto &it : *UserAcc)
+    for(auto &it : (*UserAcc)["Accounts"])
         cout << "Last Name" << it["Last Name"] && cout << "Account Number: " << it["Account Number"] << "\n";
     if(infile.eof()) cout << "End of File";
     infile.close();   
@@ -190,7 +190,7 @@ void Bank::displayBalance()
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
-   for(auto &it : *AccountData)
+   for(auto &it : (*AccountData)["Accounts"])
    {
         if(it["Account Number"] == accountNumber)
         {
@@ -220,7 +220,7 @@ void Bank::deposit()
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
-   for(auto &it : *AccountData)
+   for(auto &it : (*AccountData)["Accounts"])
    {
         if(it["Account Number"] == accountNumber)
         {
@@ -266,7 +266,7 @@ void Bank::withdraw()
    {
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
-   for(auto &it : *AccountData)
+   for(auto &it : (*AccountData)["Accounts"])
    {
         if(it["Account Number"] == accountNumber)
         {
@@ -322,13 +322,13 @@ void Bank::closeAccount()
    cout << "Please enter your account number: " << endl;
    cin >> accountNumber;
    
-    for (auto it = AccountData->begin(); it != AccountData->end(); ++it)
+    for (auto it = (*AccountData)["Accounts"].begin(); it != (*AccountData)["Accounts"].end(); ++it)
     {
         if ((*it)["Account Number"] == accountNumber)
         {
             validAccount = true;
+            (*AccountData)["Accounts"].erase(it); // Remove the account from the array
             std::cout << "Account " << accountNumber << " removed." << std::endl;
-            AccountData->erase(it); // Remove the account from the array
             break;
         }
     }
