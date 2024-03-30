@@ -1,15 +1,8 @@
 #include<iostream>
-#include<string>
-#include<map>
-#include<cctype>
-#include<cstdlib>
-#include <typeinfo>
 #include "includes/Bank.h"
 #include "includes/Bank.cpp"
 #include "includes/Account.cpp"
 #include "includes/Account.h"
-#include "includes/json.hpp"
-using json = nlohmann::json;
 using namespace std;
 
 //****************************************************Structs***************************************************//
