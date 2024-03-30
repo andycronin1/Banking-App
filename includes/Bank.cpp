@@ -1,109 +1,12 @@
-#include<iostream>
+#include <iostream>
 #include<fstream>
-#include<string>
-#include<map>
-#include<cctype>
 #include "json.hpp"
-#include<cstdlib>
-#include <typeinfo>
 using json = nlohmann::json;
-using namespace std;
+#include "Bank.h"
+#include "Account.h"
 
-//****************************************************Structs***************************************************//
-
-struct Transaction
-{
-    double transaction_amount;
-    string date;
-    string description;
-};
-
-//****************************************************Classes***************************************************//
-class Account
-{
-    private:
-    
-    string fname;
-    string lname;
-    float balance;
-    int accountNumber;
-
-    public:
-    
-    //static member so all classes have access to the counter for next account number
-    static int nextAccountNumber;
-    
-    ////*****************Constructors******************////
-    Account(string fname,string lname,float balance)
-    {
-        //gather the next account number for the next object instance. Using the function. 
-        this->accountNumber = getNextAccountNumber();
-        this->fname = fname;
-        this->lname = lname;
-        this->balance = balance;
-    }
-    
-    int getNextAccountNumber()
-    {
-        //increment the next account number and return it 
-        return nextAccountNumber++;
-    }
-
-    ///*************Member Functions******************///////////
-    friend ifstream;
-    friend class Bank;
-    friend void depositMoney();
-    //friend void accountToFile(Account *acc);
-    string getFName() const {return fname;}
-    string getLName() const {return lname;}
-    float getBalance() const {return balance;}
-    int getAccNumber() const {return accountNumber;}
-
-    friend ostream& operator<<(ostream& os, const Account& obj);
-
-};
-//initialise the account number
-int Account::nextAccountNumber = 1;
-//AccountFunctions
-ostream& operator<<(ostream& os, const Account& obj) {
-    os << "your first name is: " << obj.fname;
-    return os;
-}
-void accountToFile(Account*& acc)
-{
-    //generating new account with a unique pointer so data is deallocated from heap automatically after use. 
-    unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
-    //now need to append this to 'newObj' that got created in the json file previously'
-    //importing account details json file
-    ifstream AccountDeets("AllAccountDetails.json");
-    //creating a JSON object and pointer to store the account details in 
-    unique_ptr<json> data(new json);
-    //sending account details to the data stored inside the pointer 
-    AccountDeets >> *data;
-    //calling the push back function (-> used to call the member function of the data inside the pointer )
-    (*data)["Accounts"].push_back(*newObj);
-    //sending to account details json file
-    ofstream ofs("AllAccountDetails.json");
-    //organising JSON data for readability
-    ofs << data->dump(4);
-    //closing file
-    ofs.close();
-
-}
-
-class Bank 
-{
-
-    static int NumberOfAccounts; 
-
-    private: 
-    string bank_name = "Andy's Bank";
-
-    protected:
-    
-    public: 
-    ///*****Constructors****/////
-    Bank()
+    ///*****Bank Constructor****/////
+    Bank::Bank()
     {
     //checking if file exits. If not, create empty array in file. 
     ifstream inputFile("AllAccountDetails.json");
@@ -112,44 +15,15 @@ class Bank
     static ofstream ofs("AllAccountDetails.json", ios::app);
     json new_object = json::object();
     new_object["Accounts"] = json::array();
+    new_object["Transactions"] = json::array();
     ofs << new_object;
     ofs.close();
     }
     }
-    ///*********************Member Functions*****************////////////////////
 
-    //function to create an account
-    void createAccount(string fname, string lname, float initBalance);
-    void closeAccount();
-    //delete an Account class object
-    void deposit();
-    //Read in data and store somewhere
-    void withdraw();
-    //read data stored in somewhere, remove it from storage, display to user
-    void displayBalance();
-    //function to check for valid name input
-    bool validName(string name);
-    void showAccounts();
-    void createTransaction();
-
-    ///*******************Destructors**********************/////////
-    ~Bank()
-    {
-        cout << "Bank Class Destroyed" << "\n";
-    }
-
-};
-//Bank initialisors 
+    //Bank initialisors 
 int Bank::NumberOfAccounts = 0;
 //Bank Functions
-void Bank::createAccount(string fname, string lname, float balance)
-{
-    //generating new account and assinging to heap
-    Account* acc = new Account(fname, lname, balance);
-    accountToFile(acc);
-    //removing from heap
-    delete acc;
-}
 bool Bank::validName(string name)
 {   
     // Use getline to handle spaces in input
@@ -346,83 +220,61 @@ void Bank::closeAccount()
     //closing file
     ofs.close();
 }
-void Bank::createTransaction()
+void Bank::createTransactionHistory(int accountNumber)
 {
-    
+    //importing account details json file
+    ifstream AccountDeets("AllAccountDetails.json");
+    //creating a JSON object and pointer to store the account details in 
+    unique_ptr<json> data(new json);
+    //sending account details to the data stored inside the pointer 
+    AccountDeets >> *data;
+    json new_object = json::object();
+    new_object[accountNumber] = json::array();
+    (*data)["Transactions"].push_back(new_object);
+    //sending to account details json file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << data->dump(4);
+    //closing file
+    ofs.close();
 }
 
-//**********************************************Main**********************************************************//
-int main()
+
+void Bank::createAccount(string fname, string lname, float balance)
 {
-   int selectedOption;
-   Bank b;
-   string fname, lname;
-   float balance;
-
-   while(selectedOption!=7)
-   {  
-   cout << "***Banking System***" << "\n" <<endl;
- 
-   cout << "Select one option below:" << "\n";
-   cout << "1. Open Account" << endl; 
-   cout << "2. Balance enquriy" << endl;
-   cout << "3. Deposit" << endl; 
-   cout << "4. Withdraw" << endl;
-   cout << "5. Close an Account" << endl;
-   cout << "6. Show all Accounts" << endl;
-   cout << "7. Quit" << endl;
-   cout << "What would you like to do?: " ;
-   try
-   {
-      cin >> selectedOption;
-      if(selectedOption > 7)
-        throw (101);
-   }
-   catch (int e)
-   {
-     cout << "Invalid entry. Please try again: " << "error code " << e;
-   }
-   switch(selectedOption)
-   {
-    case 1: //create an account
-        while(true)
-        {
-            cout << "Please Enter Your First Name: ";
-            cin >> fname;
-            if(b.validName(fname))
-            {
-                break;
-            }
-        }
-        cout << "Please Enter Your Last Name: ";
-        cin >> lname; 
-        cout << "How much would you like to deposit?: ";
-        cin >> balance;
-        b.createAccount(string(fname), string(lname), float(balance));
-            break;           
-    case 2: //balance enquiry
-        b.displayBalance();
-        break;   
-    case 3: //deposit
-        b.deposit();
-        break;   
-    case 4:
-        b.withdraw(); //Withdraw
-        break;   
-    case 5: //close Accounts
-        b.closeAccount();
-        break;   
-    case 6: //Show All Accounts
-        b.showAccounts();
-        break;   
-    case 7: //Quit
-        cout << "Thanks for using my Banking App! " << "\n";
-        exit(0);   
-   }
-   }
-
-   
-
-   return 0; 
+    //generating new account and assinging to heap
+    Account* acc = new Account(fname, lname, balance);
+    accountToFile(acc);
+    //removing from heap
+    delete acc;
 }
 
+void Bank::accountToFile(Account*& acc)
+{
+    //generating new account with a unique pointer so data is deallocated from heap automatically after use.
+    unique_ptr<json> newObj(new json{{"First Name", acc->getFName()}, {"Last Name", acc->getLName()}, {"Account Number", acc->getAccNumber()}, {"Balance", acc->getBalance()}});
+    //now need to append this to 'newObj' that got created in the json file previously'
+    //importing account details json file
+    cout << *newObj;
+    ifstream AccountDeets("AllAccountDetails.json");
+    //creating a JSON object and pointer to store the account details in 
+    unique_ptr<json> data(new json);
+    //sending account details to the data stored inside the pointer 
+    AccountDeets >> *data;
+    //calling the push back function (-> used to call the member function of the data inside the pointer )
+    (*data)["Accounts"].push_back(*newObj);
+    //(*data)["Accounts"].push_back(AccountDicObj);
+    //sending to account details json file
+    ofstream ofs("AllAccountDetails.json");
+    //organising JSON data for readability
+    ofs << data->dump(4);
+    //closing file
+    ofs.close();
+
+}
+
+    //**********Bank Destructor**************//
+    Bank::~Bank()
+    {
+        cout << "Bank Class Destroyed" << "\n";
+    }
